@@ -3,19 +3,19 @@ module DeviseGoogleAuthenticator::Patches
   module DisplayQR
     extend ActiveSupport::Concern
     included do
-      
+
       #arrr be the patch
       alias_method :create_original, :create
 
-      define_method :create do
+      define_method :create do |&b|
         build_resource(sign_up_params)
 
         if resource.save
-          yield resource if block_given?
+          b.call resource if block_given?
           if resource.active_for_authentication?
             set_flash_message :notice, :signed_up if is_flashing_format?
             sign_in(resource_name, resource)
-            
+
             if resource.respond_to? :gauth_enabled?
               if resource.class.ga_bypass_signup
                 respond_with resource, location: after_sign_up_path_for(resource)
